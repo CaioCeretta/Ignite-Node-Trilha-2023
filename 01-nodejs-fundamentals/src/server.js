@@ -36,10 +36,11 @@ const server = http.createServer((req, res) => {
   if (method === 'POST' && url === '/users') {
     users.push({ id: 1, name: 'Caio', email: 'caio@example.com' })
 
-    return res.end('user creation')
+    return res.writeHead(201).end();
   }
 
-  res.end('Ciao, Mondo')
+  // res.end('Ciao, Mondo')
+  res.writeHead(404).end()
 
 })
 
