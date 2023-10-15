@@ -1,4 +1,4 @@
-import { Readable } from 'node:stream'
+import { Readable, Transform, Writable } from 'node:stream'
 
 //Nerflix & Spotify
 
@@ -20,23 +20,43 @@ already read. We can simultaneously do the two things at the same time   */
 // process.stdin
 //   .pipe(process.stdout)
 
+
+//Readable Streams
+
 class OneToHundredStream extends Readable {
   index = 1
 
   _read() {
+    const i = this.index++
 
-    setTimeout(() => {
-      const i = this.index++
+    if(i > 100) {
+      this.push(null)
+    } else {
+      const buf = Buffer.from(String(i))
+      this.push(buf)
+    }
 
-      if (i > 100) {
-        this.push(null)
-      } else {
-        const buf = Buffer.from(String(i))
-
-        this.push(buf)
-      }
-    }, 1000)
   }
 }
 
+//Write Streams
+
+class MultiplyByTenSteam extends Writable {
+  _write(chunk, encoding, callback) {
+    console.log(Number(chunk.toString()) * 10)
+    callback();
+  }
+}
+
+class InverseNumberStream extends Transform {
+  _transform(chunk, encoding, cb) {
+    const transformedChunk = Number(chunk.toString()) * -1
+
+    cb(null, Buffer.from(String(transformedChunk)))
+  }
+}
+
+
 new OneToHundredStream().pipe(process.stdout)
+
+// new OneToHundredStream().pipe(new InverseNumberStream()).pipe(new MultiplyByTenSteam())

@@ -5,6 +5,7 @@
 on modules we can replace the require keyword with the import keyword */
 
 import http from 'node:http'
+import { json } from './middlewares/json.js';
 
 // in the latest node, when we import an internal module, node asks us to add a prefix node: before these modules
 
@@ -26,15 +27,19 @@ import http from 'node:http'
 
 const users = [];
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const { method, url } = req
 
+  await json(req, res)
+
   if (method === 'GET' && url === '/users') {
-    return res.setHeader('Content-type', 'application/json').end(JSON.stringify(users))
+    return res. end(JSON.stringify(users))
   }
 
   if (method === 'POST' && url === '/users') {
-    users.push({ id: 1, name: 'Caio', email: 'caio@example.com' })
+    const { name, email } = req. body
+
+    users.push({ id: 1, name, email })
 
     return res.writeHead(201).end();
   }
