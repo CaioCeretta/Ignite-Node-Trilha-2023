@@ -4,8 +4,11 @@
 /* Now we utilize  ESModules (Don't forget to change the type on the package.json)
 on modules we can replace the require keyword with the import keyword */
 
-import http from 'node:http'
+import http from 'node:http';
 import { json } from './middlewares/json.js';
+import { routes } from './routes.js';
+import { extractQueryParams } from './utils/extract-query-params.js';
+
 
 // in the latest node, when we import an internal module, node asks us to add a prefix node: before these modules
 
@@ -25,33 +28,38 @@ import { json } from './middlewares/json.js';
 
 */
 
-const users = [];
 
 const server = http.createServer(async (req, res) => {
   // await json(req, res)
   const { method, url } = req
-
   
   await json(req, res)
 
 
-
-  if (method === 'GET' && url === '/users') {
-    return res
-      .setHeader('Content-type', 'application/json')
-      .end(JSON.stringify(users))
-  }
-
-  if (method === 'POST' && url === '/users') {
-    const { name, email } = req.body
-
-    users.push({ id: 1, name, email })
-
-    return res.writeHead(201).end();
-  }
+  /*Here, because on every route we are wrapping with buildRoutePath, it will return a RegExp, and all RegExp has the test
+  method to see if it matches
+  
+  So i'm testing if this route matches that regex we've just created
+  */
+  const route = routes.find(route => {
+    return route.method === method && route.path.test(url)
+  })
 
   // res.end('Ciao, Mondo')
-  res.writeHead(404).end()
+
+  if(route) {
+    const routeParams = req.url.match(route.path)
+
+    const { query, ...params } = routeParams.groups
+    req.query = query ? extractQueryParams(query) : {}
+
+    req.params = { ...routeParams.groups }
+
+    return route.handler(req, res)
+  }
+
+  return res.writeHead(404).end()
+
 
 })
 
