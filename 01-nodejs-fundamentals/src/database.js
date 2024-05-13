@@ -10,9 +10,9 @@ export class Database {
     fs.readFile(databasePath, 'utf8').then(data => {
       this.#database = JSON.parse(data)
     })
-    .catch(() => {
-      this.#persist()
-    })
+      .catch(() => {
+        this.#persist()
+      })
 
   }
 
@@ -44,12 +44,12 @@ export class Database {
 
     console.log(rowIndex)
 
-    if(rowIndex > -1) {
+    if (rowIndex > -1) {
       this.#database[table].splice(rowIndex, 1)
       this.#persist()
     }
 
-    
+
   }
 
   update(table, id, data) {
@@ -59,16 +59,16 @@ export class Database {
     console.log(rowIndex)
 
     if (rowIndex > -1) {
-      this.#database[table][rowIndex] = {id, ...data}
+      this.#database[table][rowIndex] = { id, ...data }
 
       this.#persist()
     }
-    
+
   }
 
   select(table, search) {
     let data = this.#database[table] ?? []
-    
+
     /* 
       If we have an object like { name: 'Caio', email: 'caioceretta@gmail.com' }
 
@@ -77,11 +77,13 @@ export class Database {
       so it is the key on the first index of an array than the value in the other
     */
 
-    if(search) {
+    if (search) {
+      console.log(Object.entries(search))
+
       data = data.filter(row => {
         return Object.entries(search).some(([key, value]) => {
           return row[key].includes(value)
-      })
+        })
       })
     }
 
