@@ -1,7 +1,8 @@
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import { knex } from '../database'
+import { knex, knex } from '../database'
 import crypto, { randomUUID } from 'node:crypto'
+import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 
 /*
   Cookies <-> ways for us to keep a context between the requisitions
@@ -19,33 +20,69 @@ import crypto, { randomUUID } from 'node:crypto'
 */
 
 export async function transactionRoutes(app: FastifyInstance) {
-  app.get('/', async () => {
-    const transactions = await knex('transactions').select()
+  /* Now this is global, but specific to our transactions module, and if i wanted it to be on all routes, it would have to be
+  on the server, before all routes */
 
-    return { transactions }
-  })
+  // app.addHook('preHandler', async (req) => {
+  //   console.log(`[${req.method} ${req.url}]`)
+  // })
 
-  app.get('/:id', async (req) => {
-    const getTransactionsParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
+  app.get(
+    '/',
+    {
+      preHandler: checkSessionIdExists,
+    },
+    async (req) => {
+      const { sessionId } = req.cookies
 
-    console.log(req.params)
+      const transactions = await knex('transactions')
+        .where('session_id', sessionId)
+        .select()
 
-    const { id } = getTransactionsParamsSchema.parse(req.params)
+      return { transactions }
+    },
+  )
 
-    const transaction = await knex('transactions').where('id', id).first()
+  app.get(
+    '/:id',
+    {
+      preHandler: checkSessionIdExists,
+    },
+    async (req) => {
+      const getTransactionsParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
 
-    return transaction
-  })
+      console.log(req.params)
 
-  app.get('/summary', async () => {
-    const summary = await knex('transactions')
-      .sum('amount', { as: 'amount' })
-      .first()
+      const { id } = getTransactionsParamsSchema.parse(req.params)
 
-    return { summary }
-  })
+      const { sessionId } = req.cookies
+
+      const transaction = await knex('transactions')
+        .where({ session_id: sessionId, id })
+        .first()
+
+      return transaction
+    },
+  )
+
+  app.get(
+    '/summary',
+    {
+      preHandler: checkSessionIdExists,
+    },
+    async (req) => {
+      const { sessionId } = req.cookies
+
+      const summary = await knex('transactions')
+        .where('session_id', sessionId)
+        .sum('amount', { as: 'amount' })
+        .first()
+
+      return { summary }
+    },
+  )
 
   app.post('/', async (req, rep) => {
     const createTransactionBodySchema = z.object({
