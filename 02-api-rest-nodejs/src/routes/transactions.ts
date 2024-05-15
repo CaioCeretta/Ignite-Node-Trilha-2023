@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
-import { knex, knex } from '../database'
+import { knex } from '../database'
 import crypto, { randomUUID } from 'node:crypto'
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 
@@ -63,7 +63,7 @@ export async function transactionRoutes(app: FastifyInstance) {
         .where({ session_id: sessionId, id })
         .first()
 
-      return transaction
+      return { transaction }
     },
   )
 
