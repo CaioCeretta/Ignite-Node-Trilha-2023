@@ -8,7 +8,7 @@ import { knex as setupKnex, Knex } from 'knex'
 export const config: Knex.Config = {
   client: 'sqlite3',
   connection: {
-    filename: './tmp/app.db',
+    filename: './db/app.db',
   },
   useNullAsDefault: true,
   migrations: {
@@ -41,3 +41,8 @@ and don't forget that we need to add this on our scripts
 and when we call it, we utilize something like npm run knes -- migrate:make create-documents
 
 
+Common commands
+
+npm run knex --migrate:latest to run the latest migration
+npm run knex -- migrate:rollback to go back to the last migration
+npm run knex -- migrate:make table_name to create a migration
