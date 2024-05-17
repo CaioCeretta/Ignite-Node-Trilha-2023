@@ -2,6 +2,10 @@
 
 ## What is Docker?
 
+a Docker container is best described as "an isolated application with its dependencies."
+
+Docker containers are a form of operating-system-level virtualization that allows packaging and running an application along with its dependencies, such as libraries and other components necessary for its execution, in an isolated environment. This means Docker containers encapsulate the application and its dependencies in a single, consistent environment, making it easier to deploy and run across different environments, from development to production.
+
 Docker is an essential tool, mainly for who work with the back-end, particularly for deploying an application. Now we are
 going to use it locally for our app development. With it we will be able to run the postgres db without having to
 install anything. It is mostly utilized in the production environment, because it will facilitate the deploy of our app.
@@ -57,4 +61,24 @@ So when i access 5432 in my machine, i'm actually accessing the PostgreSQL insta
 In the notation 5432:5432, the left side of the colon represents the port on the host machine. while the right side represents
 the port inside the container
 
+If in our terminal, if we close the docker image, docker is smart enough to keep the image in cache,
+with the command docker ps it will retrieve the current running containers and docker ps -a, we are going to see all of them
+
+If we want to restart a container, we don't need that command we passed before, we just say docker run "name of the container"
+in the current example, sudo docker start api-solid-pg
+
+and to remove a container
+
+sudo docker rm api-solid-pg
+
+to create it, we only need to use the docker run as the following command, same as before 
+
+* One important note, when we created the postgres container, running in our machine, it's running on our machine, so when another person execute the application, she will need to execute the docker run from scratch, and it may be bad, because
+if  we had more than one container, it would be recommended for us to create a guide of how to set up our app, and we don't
+want it
+
+To fix this possible problem, there is a docker tool that we use in the development environment, which is docker-compose.
+Docker-compose is a file that is created in the root of our project, named as docker-compose.yml
+
+that file basically dictates all the containers that this applicatio needs to create.
 

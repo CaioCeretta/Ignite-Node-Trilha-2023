@@ -1,0 +1,17 @@
+#Container name will be slightly different from what it was, because it will get the name of the folder + the name i typed here
+
+# to up a container, we use sudo docker-compose up -d and to stop sudo docker-composer stop
+
+version: '3'
+
+services:
+  api-solid-pg: #Container Name
+    image: bitnami/postgresql #Container Image
+    ports: # Container ports (hostport:containerport)
+      - 5432:5432
+    environment:
+      - POSTGRESQL_USERNAME=docker
+      - POSTGRESQL_PASSWORD=docker
+      - POSTGRESQL_DATABASE=apisolid
+
+      

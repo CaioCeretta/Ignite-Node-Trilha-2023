@@ -1,8 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// we use npx prisma migrate dev when we want new tables inserted in this file to be on our development db
+// we use npx migrate deploy on production, it won't look for new alterations, it will look for migrations and run it
 
 generator client {
   provider = "prisma-client-js"
@@ -14,11 +11,51 @@ datasource db {
 }
 
 model User {
-  id    String @id @default(uuid())
-  name  String
-  email String @unique
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password_hash String
+  created_at    DateTime @default(now())
+
+  // It is important for us to understand that are different hashing algorithms, and for this password hashing, we won't
+  // follow a cryptography algorithm, because a cryptography is commonly a two sided encoding, it comes and goes, we can
+  // encrypt a data and decrypt it. In our case, we will use hashing instead of cryptography, in the hashing we can
+  // "only go" and not the other way around, one time the data was encrypted, we cannot decrypt it anymore.
+
+  checkIns CheckIn[]
 
   // On the @@map("") we can change the table name, the @@ is because is like a model configuration and only one @ is for
   // column configs
   @@map("users")
+}
+
+// One thing that we will do right here is that on the column that check if it is validated, we won't use a boolean value
+// to determine if it is validated or not, we will utilize the Date when it was validated, and that column, being optional
+// we will both know if it is validated and when it was validated
+
+model CheckIn {
+  id           String    @id @default(uuid())
+  created_at   DateTime  @default(now())
+  validated_at DateTime?
+
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String
+
+  gym    Gym    @relation(fields: [gym_id], references: [id])
+  gym_id String
+
+  @@map("check_ins")
+}
+
+model Gym {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  phone       String?
+  latitude    Decimal
+  longitude   Decimal
+
+  checkIns CheckIn[]
+
+  @@map("gym")
 }
