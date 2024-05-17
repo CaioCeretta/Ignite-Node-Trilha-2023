@@ -43,6 +43,6 @@ and when we call it, we utilize something like npm run knes -- migrate:make crea
 
 Common commands
 
-npm run knex --migrate:latest to run the latest migration
+npm run knex -- migrate:latest to run the latest migration
 npm run knex -- migrate:rollback to go back to the last migration
 npm run knex -- migrate:make table_name to create a migration
